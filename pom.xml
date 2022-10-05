@@ -21,19 +21,22 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>30</version>
+        <artifactId>sling-bundle-parent</artifactId>
+        <version>49</version>
         <relativePath/>
     </parent>
 
     <artifactId>org.apache.sling.installer.factory.model</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
 
     <name>Apache Sling Installer Provisioning Model Support</name>
     <description> 
         Provides support for the provisioning model to the Apache Sling OSGi installer
     </description>
+
+    <properties>
+        <bnd.baseline.fail.on.missing>false</bnd.baseline.fail.on.missing>
+    </properties>
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-installer-factory-model.git</connection>
@@ -41,28 +44,26 @@
         <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-installer-factory-model.git</url>
     </scm>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
