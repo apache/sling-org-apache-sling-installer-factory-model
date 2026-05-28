@@ -66,7 +66,7 @@ public class RepositoryAccess {
 
         final File artifactFile = this.getArtifact(artifact);
 
-        if ( artifactFile == null ) {
+        if (artifactFile == null) {
             return null;
         }
         logger.info("Responding for {} with {}", artifact, artifactFile);
@@ -79,14 +79,14 @@ public class RepositoryAccess {
         final String filePath = (this.repoHome.concat(artifact.getRepositoryPath())).replace('/', File.separatorChar);
         logger.info("Trying to fetch artifact from {}", filePath);
         final File f = new File(filePath);
-        if ( !f.exists() || !f.isFile() || !f.canRead() ) {
+        if (!f.exists() || !f.isFile() || !f.canRead()) {
             logger.info("Trying to download {}", artifact.getRepositoryPath());
             try {
                 this.downloadArtifact(artifact);
-            } catch ( final IOException ioe ) {
+            } catch (final IOException ioe) {
                 logger.debug("Error downloading file.", ioe);
             }
-            if ( !f.exists() || !f.isFile() || !f.canRead() ) {
+            if (!f.exists() || !f.isFile() || !f.canRead()) {
                 logger.info("Artifact not found {}", artifact);
 
                 return null;
@@ -103,7 +103,8 @@ public class RepositoryAccess {
         // create fake pom
         final Path dir = Files.createTempDirectory(null);
         final List<String> lines = new ArrayList<String>();
-        lines.add("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
+        lines.add(
+                "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
         lines.add("    <modelVersion>4.0.0</modelVersion>");
         lines.add("    <groupId>org.apache.sling</groupId>");
         lines.add("    <artifactId>temp-artifact</artifactId>");
@@ -113,10 +114,10 @@ public class RepositoryAccess {
         lines.add("            <groupId>" + artifact.getGroupId() + "</groupId>");
         lines.add("            <artifactId>" + artifact.getArtifactId() + "</artifactId>");
         lines.add("            <version>" + artifact.getVersion() + "</version>");
-        if ( artifact.getClassifier() != null ) {
+        if (artifact.getClassifier() != null) {
             lines.add("            <classifier>" + artifact.getClassifier() + "</classifier>");
         }
-        if ( !"bundle".equals(artifact.getType()) && !"jar".equals(artifact.getType()) ) {
+        if (!"bundle".equals(artifact.getType()) && !"jar".equals(artifact.getType())) {
             lines.add("            <type>" + artifact.getType() + "</type>");
         }
         lines.add("            <scope>provided</scope>");

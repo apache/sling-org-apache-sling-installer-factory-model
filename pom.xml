@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -22,21 +22,15 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling-bundle-parent</artifactId>
-        <version>49</version>
-        <relativePath/>
+        <version>66</version>
+        <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.installer.factory.model</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
     <name>Apache Sling Installer Provisioning Model Support</name>
-    <description> 
-        Provides support for the provisioning model to the Apache Sling OSGi installer
-    </description>
-
-    <properties>
-        <bnd.baseline.fail.on.missing>false</bnd.baseline.fail.on.missing>
-    </properties>
+    <description>Provides support for the provisioning model to the Apache Sling OSGi installer</description>
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-installer-factory-model.git</connection>
@@ -44,10 +38,15 @@
         <url>https://github.com/apache/sling-org-apache-sling-installer-factory-model.git</url>
     </scm>
 
+    <properties>
+        <sling.java.version>8</sling.java.version>
+        <bnd.baseline.fail.on.missing>false</bnd.baseline.fail.on.missing>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
+            <artifactId>org.osgi.framework</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

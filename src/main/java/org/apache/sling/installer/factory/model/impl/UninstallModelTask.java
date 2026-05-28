@@ -32,8 +32,7 @@ import org.osgi.framework.BundleContext;
  */
 public class UninstallModelTask extends AbstractModelTask {
 
-    public UninstallModelTask(final TaskResourceGroup group,
-            final BundleContext bundleContext) {
+    public UninstallModelTask(final TaskResourceGroup group, final BundleContext bundleContext) {
         super(group, bundleContext);
     }
 
@@ -41,14 +40,14 @@ public class UninstallModelTask extends AbstractModelTask {
     public void execute(final InstallationContext ctx) {
         try {
             final OsgiInstaller installer = this.getService(OsgiInstaller.class);
-            if ( installer == null ) {
+            if (installer == null) {
                 ctx.log("Unable to get OSGi Installer service!");
             } else {
                 final TaskResource resource = this.getResource();
                 ctx.log("Uninstalling {}", resource.getEntityId());
                 installer.registerResources("model-" + resource.getAttribute(ModelTransformer.ATTR_FEATURE_NAME), null);
-                final String path = (String)resource.getAttribute(ModelTransformer.ATTR_BASE_PATH);
-                if ( path != null ) {
+                final String path = (String) resource.getAttribute(ModelTransformer.ATTR_BASE_PATH);
+                if (path != null) {
                     final File dir = new File(path);
                     deleteDirectory(dir);
                 }

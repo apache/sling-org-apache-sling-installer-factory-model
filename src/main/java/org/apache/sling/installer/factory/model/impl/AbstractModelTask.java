@@ -41,14 +41,13 @@ public abstract class AbstractModelTask extends InstallTask {
 
     private final Map<ServiceReference<?>, Object> services = new HashMap<>();
 
-    public AbstractModelTask(final TaskResourceGroup group,
-            final BundleContext bundleContext) {
+    public AbstractModelTask(final TaskResourceGroup group, final BundleContext bundleContext) {
         super(group);
         this.bundleContext = bundleContext;
     }
 
     protected void cleanup() {
-        for(final ServiceReference<?> r : this.services.keySet()) {
+        for (final ServiceReference<?> r : this.services.keySet()) {
             this.bundleContext.ungetService(r);
         }
         this.services.clear();
@@ -58,26 +57,26 @@ public abstract class AbstractModelTask extends InstallTask {
     protected <T> T getService(final Class<T> type) {
         T service = null;
         final ServiceReference<T> reference = this.bundleContext.getServiceReference(type);
-        if ( reference != null ) {
-            service = (T)this.services.get(reference);
-            if ( service == null ) {
+        if (reference != null) {
+            service = (T) this.services.get(reference);
+            if (service == null) {
                 service = this.bundleContext.getService(reference);
-                if ( service != null ) {
+                if (service != null) {
                     this.services.put(reference, service);
                 } else {
                 }
             }
         }
-        if ( service == null ) {
+        if (service == null) {
             logger.error("Unable to get OSGi service " + type.getName());
         }
         return service;
     }
 
     protected void deleteDirectory(final File dir) {
-        if ( dir.exists() ) {
-            for(final File f : dir.listFiles()) {
-                if ( f.isDirectory() ) {
+        if (dir.exists()) {
+            for (final File f : dir.listFiles()) {
+                if (f.isDirectory()) {
                     deleteDirectory(f);
                 } else {
                     f.delete();
