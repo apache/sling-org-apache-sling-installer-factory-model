@@ -66,13 +66,14 @@ public class ModelTaskFactory implements InstallTaskFactory {
     @Override
     public InstallTask createTask(final TaskResourceGroup group) {
         final TaskResource rsrc = group.getActiveResource();
-        if ( !ModelTransformer.TYPE_PROV_MODEL.equals(rsrc.getType()) ) {
+        if (!ModelTransformer.TYPE_PROV_MODEL.equals(rsrc.getType())) {
             return null;
         }
-        if (rsrc.getState() == ResourceState.UNINSTALL ) {
+        if (rsrc.getState() == ResourceState.UNINSTALL) {
             return new UninstallModelTask(group, bundleContext);
         }
-        return new InstallModelTask(group,
+        return new InstallModelTask(
+                group,
                 this.settings.getRunModes(),
                 this.repository,
                 this.repoInitProcessor,

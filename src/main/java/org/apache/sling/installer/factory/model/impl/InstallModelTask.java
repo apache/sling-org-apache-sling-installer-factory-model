@@ -18,6 +18,9 @@
  */
 package org.apache.sling.installer.factory.model.impl;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,9 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.sling.installer.api.InstallableResource;
 import org.apache.sling.installer.api.OsgiInstaller;
@@ -75,7 +75,8 @@ public class InstallModelTask extends AbstractModelTask {
 
     private final RepoInitParser repoInitParser;
 
-    public InstallModelTask(final TaskResourceGroup group,
+    public InstallModelTask(
+            final TaskResourceGroup group,
             final Set<String> runModes,
             final SlingRepository repository,
             final JcrRepoInitOpsProcessor repoInitProcessor,
@@ -97,7 +98,7 @@ public class InstallModelTask extends AbstractModelTask {
             final String modelTxt = (String) resource.getAttribute(ModelTransformer.ATTR_MODEL);
             final Integer featureIndex = (Integer) resource.getAttribute(ModelTransformer.ATTR_FEATURE_INDEX);
             final String name = (String) resource.getAttribute(ModelTransformer.ATTR_FEATURE_NAME);
-            if ( modelTxt == null || featureIndex == null || name == null ) {
+            if (modelTxt == null || featureIndex == null || name == null) {
                 ctx.log("Unable to install model resource {} : no model found", resource);
                 this.getResourceGroup().setFinishState(ResourceState.IGNORED);
             } else {
@@ -107,14 +108,14 @@ public class InstallModelTask extends AbstractModelTask {
                 boolean success = false;
                 try {
                     final Result result = this.transform(name, modelTxt, featureIndex, resource, baseDir);
-                    if ( result == null ) {
+                    if (result == null) {
                         ctx.log("Unable to install model resource {} : unable to create resources", resource);
                         this.getResourceGroup().setFinishState(ResourceState.IGNORED);
                     } else {
                         // repo init first
-                        if ( result.repoinit != null ) {
+                        if (result.repoinit != null) {
                             List<Operation> ops = null;
-                            try ( final Reader r = new StringReader(result.repoinit) ) {
+                            try (final Reader r = new StringReader(result.repoinit)) {
                                 ops = this.repoInitParser.parse(r);
                             } catch (final IOException | RepoInitParsingException e) {
                                 logger.error("Unable to parse repoinit block.", e);
@@ -129,22 +130,26 @@ public class InstallModelTask extends AbstractModelTask {
                                 session = this.repository.loginAdministrative(null);
                                 this.repoInitProcessor.apply(session, ops);
                                 session.save();
-                            } catch ( final RepositoryException re) {
+                            } catch (final RepositoryException re) {
                                 logger.error("Unable to process repoinit block.", re);
-                                ctx.log("Unable to install model resource {} : unable to process repoinit block.", resource);
+                                ctx.log(
+                                        "Unable to install model resource {} : unable to process repoinit block.",
+                                        resource);
                                 this.getResourceGroup().setFinishState(ResourceState.IGNORED);
                                 return;
 
                             } finally {
-                                if ( session != null ) {
+                                if (session != null) {
                                     session.logout();
                                 }
                             }
                         }
-                        if ( !result.resources.isEmpty() ) {
+                        if (!result.resources.isEmpty()) {
                             final OsgiInstaller installer = this.getService(OsgiInstaller.class);
-                            if ( installer != null ) {
-                                installer.registerResources("model-" + name, result.resources.toArray(new InstallableResource[result.resources.size()]));
+                            if (installer != null) {
+                                installer.registerResources(
+                                        "model-" + name,
+                                        result.resources.toArray(new InstallableResource[result.resources.size()]));
                             } else {
                                 ctx.log("Unable to install model resource {} : unable to get OSGi installer", resource);
                                 this.getResourceGroup().setFinishState(ResourceState.IGNORED);
@@ -155,11 +160,11 @@ public class InstallModelTask extends AbstractModelTask {
                         success = true;
                     }
                 } finally {
-                    if ( !success && baseDir != null ) {
+                    if (!success && baseDir != null) {
                         this.deleteDirectory(baseDir);
                     }
                 }
-                if ( success ) {
+                if (success) {
                     ctx.log("Installed {}", resource.getEntityId());
                 }
             }
@@ -173,56 +178,58 @@ public class InstallModelTask extends AbstractModelTask {
         public String repoinit;
     }
 
-    private Result transform(final String name,
+    private Result transform(
+            final String name,
             final String modelText,
             final int featureIndex,
             final TaskResource rsrc,
             final File baseDir) {
         Model model = null;
-        try ( final Reader reader = new StringReader(modelText)) {
-           model = ModelUtility.getEffectiveModel(ModelReader.read(reader, name));
-        } catch ( final IOException ioe) {
+        try (final Reader reader = new StringReader(modelText)) {
+            model = ModelUtility.getEffectiveModel(ModelReader.read(reader, name));
+        } catch (final IOException ioe) {
             logger.warn("Unable to read model file for feature " + name, ioe);
         }
-        if ( model == null ) {
+        if (model == null) {
             return null;
         }
         int index = 0;
         final Iterator<Feature> iter = model.getFeatures().iterator();
-        while ( iter.hasNext() ) {
+        while (iter.hasNext()) {
             iter.next();
-            if ( index != featureIndex ) {
+            if (index != featureIndex) {
                 iter.remove();
             }
             index++;
         }
 
-        if ( baseDir != null ) {
+        if (baseDir != null) {
             final List<Artifact> artifacts = new ArrayList<>();
             final Feature feature = model.getFeatures().get(0);
-            for(final RunMode rm : feature.getRunModes()) {
-                for(final ArtifactGroup group : rm.getArtifactGroups()) {
-                    for(final Artifact a : group) {
+            for (final RunMode rm : feature.getRunModes()) {
+                for (final ArtifactGroup group : rm.getArtifactGroups()) {
+                    for (final Artifact a : group) {
                         artifacts.add(a);
                     }
                 }
             }
 
             // extract artifacts
-            final byte[] buffer = new byte[1024*1024*256];
+            final byte[] buffer = new byte[1024 * 1024 * 256];
 
-            try ( final InputStream is = rsrc.getInputStream() ) {
+            try (final InputStream is = rsrc.getInputStream()) {
                 ModelArchiveReader.read(is, new ModelArchiveReader.ArtifactConsumer() {
 
                     @Override
                     public void consume(final Artifact artifact, final InputStream is) throws IOException {
-                        if ( artifacts.contains(artifact) ) {
-                            final File artifactFile = new File(baseDir, artifact.getRepositoryPath().replace('/', File.separatorChar));
-                            if ( !artifactFile.exists() ) {
+                        if (artifacts.contains(artifact)) {
+                            final File artifactFile = new File(
+                                    baseDir, artifact.getRepositoryPath().replace('/', File.separatorChar));
+                            if (!artifactFile.exists()) {
                                 artifactFile.getParentFile().mkdirs();
                                 try (final OutputStream os = new FileOutputStream(artifactFile)) {
                                     int l = 0;
-                                    while ( (l = is.read(buffer)) > 0 ) {
+                                    while ((l = is.read(buffer)) > 0) {
                                         os.write(buffer, 0, l);
                                     }
                                 }
@@ -230,7 +237,7 @@ public class InstallModelTask extends AbstractModelTask {
                         }
                     }
                 });
-            } catch ( final IOException ioe) {
+            } catch (final IOException ioe) {
                 logger.warn("Unable to extract artifacts from model " + name, ioe);
                 return null;
             }
@@ -239,35 +246,46 @@ public class InstallModelTask extends AbstractModelTask {
         final List<ArtifactDescription> files = new ArrayList<>();
 
         Map<Traceable, String> errors = collectArtifacts(model, files, baseDir);
-        if ( errors == null ) {
+        if (errors == null) {
             final Result result = new Result();
-            for(final ArtifactDescription desc : files) {
-                if ( desc.artifactFile != null ) {
+            for (final ArtifactDescription desc : files) {
+                if (desc.artifactFile != null) {
                     try {
                         final InputStream is = new FileInputStream(desc.artifactFile);
                         final String digest = String.valueOf(desc.artifactFile.lastModified());
                         // handle start level
                         final Dictionary<String, Object> dict = new Hashtable<String, Object>();
-                        if ( desc.startLevel > 0 ) {
+                        if (desc.startLevel > 0) {
                             dict.put(InstallableResource.BUNDLE_START_LEVEL, desc.startLevel);
                         }
-                        dict.put(InstallableResource.RESOURCE_URI_HINT, desc.artifactFile.toURI().toString());
+                        dict.put(
+                                InstallableResource.RESOURCE_URI_HINT,
+                                desc.artifactFile.toURI().toString());
 
-                        result.resources.add(new InstallableResource("/" + desc.artifactFile.getName(), is, dict, digest,
-                                                              InstallableResource.TYPE_FILE, null));
-                    } catch ( final IOException ioe ) {
+                        result.resources.add(new InstallableResource(
+                                "/" + desc.artifactFile.getName(),
+                                is,
+                                dict,
+                                digest,
+                                InstallableResource.TYPE_FILE,
+                                null));
+                    } catch (final IOException ioe) {
                         logger.warn("Unable to read artifact " + desc.artifactFile, ioe);
                         return null;
                     }
-                } else if ( desc.cfg != null ) {
-                    final String id = (desc.cfg.getFactoryPid() != null ? desc.cfg.getFactoryPid() + "-" + desc.cfg.getPid() : desc.cfg.getPid());
-                    result.resources.add(new InstallableResource("/" + id + ".config",
+                } else if (desc.cfg != null) {
+                    final String id = (desc.cfg.getFactoryPid() != null
+                            ? desc.cfg.getFactoryPid() + "-" + desc.cfg.getPid()
+                            : desc.cfg.getPid());
+                    result.resources.add(new InstallableResource(
+                            "/" + id + ".config",
                             null,
                             desc.cfg.getProperties(),
                             null,
-                            InstallableResource.TYPE_CONFIG, null));
+                            InstallableResource.TYPE_CONFIG,
+                            null));
 
-                } else if ( desc.section != null ) {
+                } else if (desc.section != null) {
                     result.repoinit = desc.section.getContents();
                 }
             }
@@ -285,32 +303,35 @@ public class InstallModelTask extends AbstractModelTask {
         public Section section;
     }
 
-    private Map<Traceable, String> collectArtifacts(final Model effectiveModel,
-            final List<ArtifactDescription> files,
-            final File baseDir) {
+    private Map<Traceable, String> collectArtifacts(
+            final Model effectiveModel, final List<ArtifactDescription> files, final File baseDir) {
         final RepositoryAccess repo = new RepositoryAccess();
         final Map<Traceable, String> errors = new HashMap<>();
-        for(final Feature f : effectiveModel.getFeatures()) {
-            if ( f.isSpecial() ) {
+        for (final Feature f : effectiveModel.getFeatures()) {
+            if (f.isSpecial()) {
                 continue;
             }
-            for(final Section section : f.getAdditionalSections()) {
+            for (final Section section : f.getAdditionalSections()) {
                 final ArtifactDescription desc = new ArtifactDescription();
                 desc.section = section;
                 files.add(desc);
             }
-            for(final RunMode mode : f.getRunModes()) {
-                if ( mode.isSpecial() ) {
+            for (final RunMode mode : f.getRunModes()) {
+                if (mode.isSpecial()) {
                     continue;
                 }
-                if ( mode.isActive(this.activeRunModes) ) {
-                    for(final ArtifactGroup group : mode.getArtifactGroups()) {
-                        for(final Artifact artifact : group) {
-                            File file = (baseDir == null ? null : new File(baseDir, artifact.getRepositoryPath().replace('/', File.separatorChar)));
-                            if ( file == null || !file.exists() ) {
+                if (mode.isActive(this.activeRunModes)) {
+                    for (final ArtifactGroup group : mode.getArtifactGroups()) {
+                        for (final Artifact artifact : group) {
+                            File file = (baseDir == null
+                                    ? null
+                                    : new File(
+                                            baseDir,
+                                            artifact.getRepositoryPath().replace('/', File.separatorChar)));
+                            if (file == null || !file.exists()) {
                                 file = repo.get(artifact);
                             }
-                            if ( file == null ) {
+                            if (file == null) {
                                 errors.put(artifact, "Artifact " + artifact.toMvnUrl() + " not found.");
                             } else {
                                 final ArtifactDescription desc = new ArtifactDescription();
@@ -320,8 +341,8 @@ public class InstallModelTask extends AbstractModelTask {
                             }
                         }
                     }
-                    for(final Configuration cfg : mode.getConfigurations() ) {
-                        if ( cfg.isSpecial() ) {
+                    for (final Configuration cfg : mode.getConfigurations()) {
+                        if (cfg.isSpecial()) {
                             continue;
                         }
                         final ArtifactDescription desc = new ArtifactDescription();
